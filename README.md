@@ -1,1 +1,14 @@
 # PetFriends_Negative_Tests
+Негативные тесты для API [PetFriends] (https://petfriends.skilfactory.ru/).
+Тесты проверяют работу сервиса при некорректных данных:
+- запрос ключа без логина и пароля
+- запрос ключа с невернымиданными
+- получение списка питомцев с неверным ключом
+## Стек
+- Python 3
+- requests
+- unittests
+## Запуск тестов
+```bash
+python -m unittests tests_api.py
+```
