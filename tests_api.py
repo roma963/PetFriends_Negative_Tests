@@ -1,29 +1,34 @@
+import os
 import unittest
 import requests
 BASE_URL = 'https://petfriends.skillfactory.ru/'
 class TestPetFriendsNegative(unittest.TestCase):
-    def test_get_pet_simple_with_invalid_key(self):
-        """POST: Попытка создать питомца с неверным ключом"""
+    def test_get_pets_simple_with_valid_key(self):
+        """GET: Проверка: что с действительным ключом список питомцев возвращается (200)"""
+        url = BASE_URL + '/api/pets'
+        headers = {'auth_key': os.environ['PF_API_KEY']}
+        res = requests.get(url, headers=headers)
+        self.assertEqual(res.status_code, 200, msg=res.text)
+    def test_get_pets_valid_key(self):
+        """GET: Проверка: получение списка питомцев с валидным ключом"""
+        url = BASE_URL + '/api/pets'
+        headers = {'auth_key': os.environ['PF_API_KEY']}
+        res = requests.get(url, headers=headers)
+        self.assertEqual(res.status_code, 200, msg=res.text)
+        data = res.json()
+        self.assertIn('pets', data, msg="В ответе нет ключа 'pets'")
+        self.assertIsInstance(data['pets'],list, msg="Поле 'pets' должно быть списком")
+    def test_add_new_pet_with_valid_data(self):
+        """POST: Проверка: создание нового питомца с корректными данными"""
         url = BASE_URL + '/api/create_pet_simple'
-        headers = {'auth_key': 'invalid_key'}
-        data = {'name': 'Barsik', 'animal_type': 'cat' '3'}
+        headers = {'auth_key': os.environ['PF_API_KEY']}
+        data = {'name': 'bob', 'animal_type': 'German Shepherd', 'age': '2'}
         res = requests.post(url, headers=headers, data=data)
-        self.assertIn(res.status_code, (400, 401, 403, 404, 405), msg=res.text)
-    def test_update_pet_with_invalid_key_or_id(self):
-        """PUT: Попытка обновить данные питомца с неверным ключом/ID"""
-        bad_pet_id = 'nonexistent-id-123'
-        url = BASE_URL + f'/api/pets/{bad_pet_id}'
-        headers = {'auth_key': 'invalid_key'}
-        data = {'name': 'Newname', 'animal_type': 'dog' '5'}
-        res = requests.get(url, headers=headers, data=data)
-        self.assertIn(res.status_code, (400, 401, 403,404, 405), msg=res.text)
-    def test_delete_pet_with_invalid_key_or_id(self):
-        """DELETE: Попытка удалить питомца с неверным ключом/ID"""
-        bad_pet_id = 'nonexistent-id-123'
-        url = BASE_URL + f'/api/pets/{bad_pet_id}'
-        headers = {'auth_key': 'invalid_key'}
-        res = requests.delete(url, headers=headers)
-        self.assertIn(res.status_code, (401, 403, 404), msg=res.text)
-
+        self.assertEqual(res.status_code, 200, msg=res.text)
+        body = res.json()
+        self.assertEqual(body['name'], 'bob')
+        self.assertEqual(body['animal_type'], "German Shepherd")
+        self.assertEqual(body['age'], '2')
 if __name__ == '__main__':
     unittest.main()
+
